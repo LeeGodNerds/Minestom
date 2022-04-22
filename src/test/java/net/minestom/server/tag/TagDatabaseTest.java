@@ -316,6 +316,24 @@ public class TagDatabaseTest {
                 .filter(TagDatabase.Filter.eq(Tag.String("string"), "value")).build()));
     }
 
+    @Test
+    public void tableDownsize() {
+        TagDatabase db = createDB();
+
+        var tag = Tag.Integer("number");
+        var basicQuery = TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag, 1)).build();
+
+        var handler = TagHandler.newHandler();
+        handler.setTag(tag, 1);
+
+        db.insert(handler);
+        assertEquals(List.of(handler.asCompound()), db.find(basicQuery));
+
+        handler.removeTag(tag);
+        assertEquals(List.of(), db.find(basicQuery));
+    }
+
     public static void assertListEqualsIgnoreOrder(List<?> expected, List<?> actual) {
         assertEquals(new HashSet<>(expected), new HashSet<>(actual));
     }
