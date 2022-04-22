@@ -53,6 +53,39 @@ public class TagDatabaseTest {
     }
 
     @Test
+    public void findTagMismatch() {
+        TagDatabase db = createDB();
+        var tagInteger = Tag.Integer("key");
+        var tagDouble = Tag.Double("key");
+        var compound1 = NBT.Compound(Map.of("key", NBT.Int(1)));
+        var compound2 = NBT.Compound(Map.of("key", NBT.Double(1)));
+
+        db.insert(TagHandler.fromCompound(compound1), TagHandler.fromCompound(compound2));
+
+        var queryInteger = TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tagInteger, 1)).build();
+        assertListEqualsIgnoreOrder(List.of(compound1), db.find(queryInteger));
+
+        var queryDouble = TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tagDouble, 1D)).build();
+        assertListEqualsIgnoreOrder(List.of(compound2), db.find(queryDouble));
+    }
+
+    @Test
+    public void findArray() {
+        TagDatabase db = createDB();
+        var tag = Tag.NBT("key");
+        var nbt = NBT.IntArray(1, 2, 3);
+        var compound = NBT.Compound(Map.of("key", nbt));
+
+        db.insert(TagHandler.fromCompound(compound));
+
+        var query = TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag, nbt)).build();
+        assertListEqualsIgnoreOrder(List.of(compound), db.find(query));
+    }
+
+    @Test
     public void findMultiEq() {
         TagDatabase db = createDB();
         var tag = Tag.String("key");
