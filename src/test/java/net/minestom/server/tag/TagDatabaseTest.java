@@ -293,21 +293,23 @@ public class TagDatabaseTest {
 
         db.insert(handler);
 
+        var basicQuery = TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(Tag.Integer("number"), 1)).build();
+
         var compound = handler.asCompound();
-        assertEquals(List.of(compound), db.find(TagDatabase.query()
-                .filter(TagDatabase.Filter.eq(Tag.Integer("number"), 1)).build()));
+        assertEquals(List.of(compound), db.find(basicQuery));
 
         handler.setTag(Tag.Integer("number2"), 2);
+        db.update(basicQuery, handler);
         compound = handler.asCompound();
-        assertEquals(List.of(compound), db.find(TagDatabase.query()
-                .filter(TagDatabase.Filter.eq(Tag.Integer("number"), 1)).build()));
+        assertEquals(List.of(compound), db.find(basicQuery));
         assertEquals(List.of(compound), db.find(TagDatabase.query()
                 .filter(TagDatabase.Filter.eq(Tag.Integer("number2"), 2)).build()));
 
         handler.setTag(Tag.String("string"), "value");
+        db.update(basicQuery, handler);
         compound = handler.asCompound();
-        assertEquals(List.of(compound), db.find(TagDatabase.query()
-                .filter(TagDatabase.Filter.eq(Tag.Integer("number"), 1)).build()));
+        assertEquals(List.of(compound), db.find(basicQuery));
         assertEquals(List.of(compound), db.find(TagDatabase.query()
                 .filter(TagDatabase.Filter.eq(Tag.Integer("number2"), 2)).build()));
         assertEquals(List.of(compound), db.find(TagDatabase.query()
