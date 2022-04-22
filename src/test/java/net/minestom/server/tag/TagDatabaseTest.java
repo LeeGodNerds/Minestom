@@ -1,6 +1,8 @@
 package net.minestom.server.tag;
 
+import net.minestom.server.api.RandomUtils;
 import org.jglrxavpok.hephaistos.nbt.NBT;
+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
@@ -333,6 +335,16 @@ public class TagDatabaseTest {
         handler.removeTag(tag);
         db.update(basicQuery, handler);
         assertEquals(List.of(), db.find(basicQuery));
+    }
+
+    @Test
+    public void complexCompound() {
+        NBTCompound compound = RandomUtils.randomizeCompound(100);
+        TagDatabase db = createDB();
+        db.insert(TagHandler.fromCompound(compound));
+        var result = db.find(TagDatabase.QUERY_ALL);
+        assertEquals(1, result.size());
+        assertEquals(compound, result.get(0));
     }
 
     public static void assertListEqualsIgnoreOrder(List<?> expected, List<?> actual) {
