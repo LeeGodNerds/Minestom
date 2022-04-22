@@ -284,6 +284,36 @@ public class TagDatabaseTest {
         assertEquals(List.of(compound4, compound3, compound2, compound), db.find(descending));
     }
 
+    @Test
+    public void tableResize() {
+        TagDatabase db = createDB();
+
+        var handler = TagHandler.newHandler();
+        handler.setTag(Tag.Integer("number"), 1);
+
+        db.insert(handler);
+
+        var compound = handler.asCompound();
+        assertEquals(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(Tag.Integer("number"), 1)).build()));
+
+        handler.setTag(Tag.Integer("number2"), 2);
+        compound = handler.asCompound();
+        assertEquals(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(Tag.Integer("number"), 1)).build()));
+        assertEquals(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(Tag.Integer("number2"), 2)).build()));
+
+        handler.setTag(Tag.String("string"), "value");
+        compound = handler.asCompound();
+        assertEquals(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(Tag.Integer("number"), 1)).build()));
+        assertEquals(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(Tag.Integer("number2"), 2)).build()));
+        assertEquals(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(Tag.String("string"), "value")).build()));
+    }
+
     public static void assertListEqualsIgnoreOrder(List<?> expected, List<?> actual) {
         assertEquals(new HashSet<>(expected), new HashSet<>(actual));
     }
