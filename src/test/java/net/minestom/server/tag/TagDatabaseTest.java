@@ -331,6 +331,7 @@ public class TagDatabaseTest {
         assertEquals(List.of(handler.asCompound()), db.find(basicQuery));
 
         handler.removeTag(tag);
+        db.update(basicQuery, handler);
         assertEquals(List.of(), db.find(basicQuery));
     }
 
