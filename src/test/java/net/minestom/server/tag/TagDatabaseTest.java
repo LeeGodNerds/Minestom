@@ -91,13 +91,16 @@ public class TagDatabaseTest {
         var tag = Tag.Integer("key");
 
         var handler = TagHandler.newHandler();
+        handler.setTag(tag, 5);
+        var compound = handler.asCompound();
         // Must call TagHandler#copy to avoid side effects and invalidate the potential cache
         db.insert(handler);
 
         handler.setTag(tag, 1);
-        var query = TagDatabase.query()
-                .filter(TagDatabase.Filter.eq(tag, 1)).build();
-        assertListEqualsIgnoreOrder(List.of(), db.find(query));
+        assertListEqualsIgnoreOrder(List.of(), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag, 1)).build()));
+        assertListEqualsIgnoreOrder(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag, 5)).build()));
     }
 
     @Test
