@@ -86,6 +86,21 @@ public class TagDatabaseTest {
     }
 
     @Test
+    public void handlerCopy() {
+        TagDatabase db = createDB();
+        var tag = Tag.Integer("key");
+
+        var handler = TagHandler.newHandler();
+        // Must call TagHandler#copy to avoid side effects and invalidate the potential cache
+        db.insert(handler);
+
+        handler.setTag(tag, 1);
+        var query = TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag, 1)).build();
+        assertListEqualsIgnoreOrder(List.of(), db.find(query));
+    }
+
+    @Test
     public void findMultiEq() {
         TagDatabase db = createDB();
         var tag = Tag.String("key");
@@ -235,6 +250,35 @@ public class TagDatabaseTest {
 
         var descending = TagDatabase.query().sorter(TagDatabase.sort(tag, TagDatabase.SortOrder.DESCENDING)).build();
         assertEquals(List.of(compound3, compound2, compound1), db.find(descending));
+    }
+
+    @Test
+    public void nestedSort() {
+        TagDatabase db = createDB();
+        var tag = Tag.Integer("number").path("path", "path2");
+
+        var handler = TagHandler.newHandler();
+        var handler2 = TagHandler.newHandler();
+        var handler3 = TagHandler.newHandler();
+        var handler4 = TagHandler.newHandler();
+
+        handler.setTag(tag, 1);
+        handler2.setTag(tag, 2);
+        handler3.setTag(tag, 3);
+        handler4.setTag(tag, 4);
+
+        db.insert(handler, handler2, handler3, handler4);
+
+        var compound = handler.asCompound();
+        var compound2 = handler2.asCompound();
+        var compound3 = handler3.asCompound();
+        var compound4 = handler4.asCompound();
+
+        var ascending = TagDatabase.query().sorter(TagDatabase.sort(tag, TagDatabase.SortOrder.ASCENDING)).build();
+        assertEquals(List.of(compound, compound2, compound3, compound4), db.find(ascending));
+
+        var descending = TagDatabase.query().sorter(TagDatabase.sort(tag, TagDatabase.SortOrder.DESCENDING)).build();
+        assertEquals(List.of(compound4, compound3, compound2, compound), db.find(descending));
     }
 
     public static void assertListEqualsIgnoreOrder(List<?> expected, List<?> actual) {
