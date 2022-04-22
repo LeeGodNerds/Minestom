@@ -120,6 +120,40 @@ public class TagDatabaseTest {
     }
 
     @Test
+    public void findNestedTag() {
+        TagDatabase db = createDB();
+        var handler = TagHandler.newHandler();
+
+        var tag = Tag.String("key");
+        var tag2 = Tag.String("key2").path("path");
+        var tag3 = Tag.String("key3").path("path", "path2");
+        var tag4 = Tag.String("key4").path("path", "path2");
+        var tag5 = Tag.String("key4").path("path", "path2", "path3", "path4", "path5");
+
+        handler.setTag(tag, "value");
+        handler.setTag(tag2, "value2");
+        handler.setTag(tag3, "value3");
+        handler.setTag(tag4, "value4");
+        handler.setTag(tag5, "value5");
+
+        var compound = handler.asCompound();
+
+        db.insert(handler);
+
+        // Check query based on nested tag
+        assertListEqualsIgnoreOrder(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag, "value")).build()));
+        assertListEqualsIgnoreOrder(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag2, "value2")).build()));
+        assertListEqualsIgnoreOrder(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag3, "value3")).build()));
+        assertListEqualsIgnoreOrder(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag4, "value4")).build()));
+        assertListEqualsIgnoreOrder(List.of(compound), db.find(TagDatabase.query()
+                .filter(TagDatabase.Filter.eq(tag5, "value5")).build()));
+    }
+
+    @Test
     public void findFirst() {
         TagDatabase db = createDB();
         var tag = Tag.String("key");
