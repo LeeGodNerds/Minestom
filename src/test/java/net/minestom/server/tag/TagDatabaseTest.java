@@ -15,6 +15,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class TagDatabaseTest {
 
     @Test
+    public void insert() {
+        TagDatabase db = createDB();
+        var compound = NBT.Compound(Map.of("key", NBT.Int(1)));
+        db.insert(TagHandler.fromCompound(compound));
+    }
+
+    @Test
+    public void insertNested() {
+        TagDatabase db = createDB();
+        var compound = NBT.Compound(Map.of("key",
+                NBT.Compound(Map.of("value", NBT.Int(1)))));
+        db.insert(TagHandler.fromCompound(compound));
+    }
+
+    @Test
     public void empty() {
         TagDatabase db = createDB();
         var query = TagDatabase.query()
