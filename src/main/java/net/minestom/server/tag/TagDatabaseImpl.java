@@ -20,20 +20,8 @@ final class TagDatabaseImpl {
         private int limit = -1;
 
         @Override
-        public TagDatabase.Query.@NotNull Builder filters(@NotNull List<TagDatabase.@NotNull Filter> filters) {
-            this.filters.addAll(filters);
-            return this;
-        }
-
-        @Override
         public TagDatabase.Query.@NotNull Builder filter(TagDatabase.@NotNull Filter filter) {
             this.filters.add(filter);
-            return this;
-        }
-
-        @Override
-        public TagDatabase.Query.@NotNull Builder sorters(@NotNull List<TagDatabase.@NotNull Sorter> sorters) {
-            this.sorters.addAll(sorters);
             return this;
         }
 

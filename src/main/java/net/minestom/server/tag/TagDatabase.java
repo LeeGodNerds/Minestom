@@ -65,11 +65,7 @@ public interface TagDatabase {
         int limit();
 
         sealed interface Builder permits TagDatabaseImpl.QueryBuilder {
-            @NotNull Builder filters(@NotNull List<@NotNull Filter> filters);
-
             @NotNull Builder filter(@NotNull Filter filter);
-
-            @NotNull Builder sorters(@NotNull List<@NotNull Sorter> sorters);
 
             @NotNull Builder sorter(@NotNull Sorter sorter);
 
