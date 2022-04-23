@@ -77,10 +77,10 @@ public interface TagDatabase {
 
     sealed interface Filter permits Filter.Eq {
         static <T> Filter eq(@NotNull Tag<T> tag, @NotNull T value) {
-            return new TagDatabaseImpl.Filter.Eq<>(tag, value);
+            return new TagDatabaseImpl.FilterEq<>(tag, value);
         }
 
-        sealed interface Eq<T> extends Filter permits TagDatabaseImpl.Filter.Eq {
+        sealed interface Eq<T> extends Filter permits TagDatabaseImpl.FilterEq {
             @NotNull Tag<T> tag();
 
             @NotNull T value();
