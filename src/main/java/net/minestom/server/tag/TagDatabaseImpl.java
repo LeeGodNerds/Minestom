@@ -6,40 +6,46 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class TagDatabaseImpl {
-    record Query(List<TagDatabase.Filter> filters,
-                 List<TagDatabase.Sorter> sorters, int limit) implements TagDatabase.Query {
+    record Query<T>(List<TagDatabase.Filter> filters,
+                    List<TagDatabase.Sorter> sorters,
+                    Tag<T> selector, int limit) implements TagDatabase.Query<T> {
         Query {
             filters = List.copyOf(filters);
             sorters = List.copyOf(sorters);
         }
     }
 
-    static final class QueryBuilder implements TagDatabase.Query.Builder {
+    static final class QueryBuilder<T> implements TagDatabase.Query.Builder<T> {
+        private final Tag<T> selector;
         private final List<TagDatabase.Filter> filters = new ArrayList<>();
         private final List<TagDatabase.Sorter> sorters = new ArrayList<>();
         private int limit = -1;
 
+        QueryBuilder(Tag<T> selector) {
+            this.selector = selector;
+        }
+
         @Override
-        public TagDatabase.Query.@NotNull Builder filter(TagDatabase.@NotNull Filter filter) {
+        public TagDatabase.Query.@NotNull Builder<T> filter(TagDatabase.@NotNull Filter filter) {
             this.filters.add(filter);
             return this;
         }
 
         @Override
-        public TagDatabase.Query.@NotNull Builder sorter(TagDatabase.@NotNull Sorter sorter) {
+        public TagDatabase.Query.@NotNull Builder<T> sorter(TagDatabase.@NotNull Sorter sorter) {
             this.sorters.add(sorter);
             return this;
         }
 
         @Override
-        public TagDatabase.Query.@NotNull Builder limit(int limit) {
+        public TagDatabase.Query.@NotNull Builder<T> limit(int limit) {
             this.limit = limit;
             return this;
         }
 
         @Override
-        public TagDatabase.@NotNull Query build() {
-            return new Query(filters, sorters, limit);
+        public TagDatabase.@NotNull Query<T> build() {
+            return new Query<>(filters, sorters, selector, limit);
         }
     }
 

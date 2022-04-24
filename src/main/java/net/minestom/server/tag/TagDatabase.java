@@ -12,10 +12,14 @@ import java.util.function.UnaryOperator;
 
 @ApiStatus.Experimental
 public interface TagDatabase {
-    Query QUERY_ALL = new TagDatabaseImpl.Query(List.of(), List.of(), -1);
+    Query<NBTCompound> QUERY_ALL = query().build();
 
-    static @NotNull Query.Builder query() {
-        return new TagDatabaseImpl.QueryBuilder();
+    static <T> Query.@NotNull Builder<T> query(Tag<T> selector) {
+        return new TagDatabaseImpl.QueryBuilder(selector);
+    }
+
+    static Query.@NotNull Builder<NBTCompound> query() {
+        return query(Tag.View(TagSerializer.COMPOUND));
     }
 
     static @NotNull Sorter sort(@NotNull Tag<?> tag, SortOrder order) {
@@ -24,54 +28,47 @@ public interface TagDatabase {
 
     void insert(@NotNull TagHandler... handler);
 
-    void update(@NotNull Query query, @NotNull TagHandler handler);
+    void update(@NotNull Query<?> query, @NotNull TagHandler handler);
 
-    @NotNull List<@NotNull NBTCompound> find(@NotNull Query query);
+    <T> @NotNull List<@NotNull T> find(@NotNull Query<T> query);
 
-    <T> void replace(@NotNull Query query, @NotNull Tag<T> tag, @NotNull UnaryOperator<T> operator);
+    <T> void replace(@NotNull Query<?> query, @NotNull Tag<T> tag, @NotNull UnaryOperator<T> operator);
 
-    void delete(@NotNull Query query);
+    void delete(@NotNull Query<?> query);
 
-    default <T> void replaceConstant(@NotNull Query query, @NotNull Tag<T> tag, @Nullable T value) {
+    default <T> void replaceConstant(@NotNull Query<?> query, @NotNull Tag<T> tag, @Nullable T value) {
         replace(query, tag, t -> value);
     }
 
     default <T> void updateSingle(@NotNull Tag<T> tag, @NotNull T value, @NotNull TagHandler handler) {
-        final Query query = new TagDatabaseImpl.Query(List.of(Filter.eq(tag, value)), List.of(), 1);
+        final Query<?> query = query().filter(Filter.eq(tag, value)).limit(1).build();
         update(query, handler);
     }
 
-    default @NotNull List<@NotNull NBTCompound> find(@NotNull List<@NotNull Filter> filters) {
-        final Query query = new TagDatabaseImpl.Query(filters, List.of(), -1);
-        return find(query);
-    }
-
-    default Optional<NBTCompound> findFirst(@NotNull List<@NotNull Filter> filters) {
-        final Query query = new TagDatabaseImpl.Query(filters, List.of(), 1);
+    default <T> @NotNull Optional<@NotNull NBTCompound> findFirst(@NotNull Tag<T> tag, @NotNull T value) {
+        final Query<NBTCompound> query = query().filter(Filter.eq(tag, value)).limit(1).build();
         return find(query).stream().findFirst();
     }
 
-    default <T> @NotNull Optional<@NotNull NBTCompound> findFirst(@NotNull Tag<T> tag, @NotNull T value) {
-        return findFirst(List.of(Filter.eq(tag, value)));
-    }
-
-    sealed interface Query permits TagDatabaseImpl.Query {
+    sealed interface Query<T> permits TagDatabaseImpl.Query {
         @Unmodifiable
         @NotNull List<@NotNull Filter> filters();
 
         @Unmodifiable
         @NotNull List<@NotNull Sorter> sorters();
 
+        @NotNull Tag<T> selector();
+
         int limit();
 
-        sealed interface Builder permits TagDatabaseImpl.QueryBuilder {
-            @NotNull Builder filter(@NotNull Filter filter);
+        sealed interface Builder<T> permits TagDatabaseImpl.QueryBuilder {
+            @NotNull Builder<T> filter(@NotNull Filter filter);
 
-            @NotNull Builder sorter(@NotNull Sorter sorter);
+            @NotNull Builder<T> sorter(@NotNull Sorter sorter);
 
-            @NotNull Builder limit(int limit);
+            @NotNull Builder<T> limit(int limit);
 
-            @NotNull Query build();
+            @NotNull Query<T> build();
         }
     }
 
