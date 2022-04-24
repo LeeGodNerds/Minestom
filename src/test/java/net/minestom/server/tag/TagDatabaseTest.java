@@ -385,7 +385,7 @@ public class TagDatabaseTest {
         Tag<Integer> tag = Tag.Integer("key");
         Tag<Integer> tag2 = Tag.Integer("key").path("child");
         TagDatabase.Query<Integer> basicQuery = TagDatabase.query(tag)
-                .filter(TagDatabase.Filter.eq(tag2, 5)).build();
+                .filter(TagDatabase.Filter.eq(tag2, 2)).build();
 
         var handler = TagHandler.newHandler();
         handler.setTag(tag, 1);
