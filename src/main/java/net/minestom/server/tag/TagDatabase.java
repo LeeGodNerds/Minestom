@@ -55,7 +55,7 @@ public interface TagDatabase {
         return new TagDatabaseImpl.DeleteBuilder();
     }
 
-    interface SelectQuery<T> {
+    sealed interface SelectQuery<T> permits TagDatabaseImpl.Select {
         @NotNull Tag<T> selector();
 
         @NotNull Condition condition();
@@ -66,7 +66,7 @@ public interface TagDatabase {
         int limit();
     }
 
-    interface SelectBuilder<T> {
+    sealed interface SelectBuilder<T> permits TagDatabaseImpl.SelectBuilder {
         @NotNull SelectBuilder<T> where(@NotNull Condition condition);
 
         @NotNull SelectBuilder<T> orderByAsc(@NotNull Tag<?> tag);
@@ -78,11 +78,11 @@ public interface TagDatabase {
         @NotNull SelectQuery<T> build();
     }
 
-    interface UpdateQuery {
+    sealed interface UpdateQuery permits TagDatabaseImpl.Update {
         @NotNull Condition condition();
     }
 
-    interface UpdateBuilder {
+    sealed interface UpdateBuilder permits TagDatabaseImpl.UpdateBuilder {
         @NotNull UpdateBuilder where(@NotNull Condition condition);
 
         <T> @NotNull UpdateBuilder set(@NotNull Tag<T> tag, @NotNull T value);
@@ -90,11 +90,11 @@ public interface TagDatabase {
         @NotNull UpdateQuery build();
     }
 
-    interface DeleteQuery {
+    sealed interface DeleteQuery permits TagDatabaseImpl.Delete {
         @NotNull Condition condition();
     }
 
-    interface DeleteBuilder {
+    sealed interface DeleteBuilder permits TagDatabaseImpl.DeleteBuilder {
         @NotNull DeleteBuilder where(@NotNull Condition condition);
 
         @NotNull DeleteQuery build();
