@@ -2,82 +2,110 @@ package net.minestom.server.tag;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.function.UnaryOperator;
 
 @ApiStatus.Experimental
 public interface TagDatabase {
-    Query<NBTCompound> QUERY_ALL = query().build();
-
-    static <T> Query.@NotNull Builder<T> query(Tag<T> selector) {
-        return new TagDatabaseImpl.QueryBuilder(selector);
-    }
-
-    static Query.@NotNull Builder<NBTCompound> query() {
-        return query(Tag.View(TagSerializer.COMPOUND));
-    }
-
-    static @NotNull Sorter sort(@NotNull Tag<?> tag, SortOrder order) {
-        return new TagDatabaseImpl.Sorter(tag, order);
-    }
+    SelectQuery<NBTCompound> SELECT_ALL = select().build();
 
     void insert(@NotNull TagHandler... handler);
 
-    void update(@NotNull Query<?> query, @NotNull TagHandler handler);
+    int execute(@NotNull UpdateQuery query);
 
-    <T> @NotNull List<@NotNull T> find(@NotNull Query<T> query);
+    int execute(@NotNull DeleteQuery query);
 
-    <T> void replace(@NotNull Query<?> query, @NotNull Tag<T> tag, @NotNull UnaryOperator<T> operator);
+    <T> List<T> execute(@NotNull SelectQuery<T> query);
 
-    void delete(@NotNull Query<?> query);
-
-    default <T> void replaceConstant(@NotNull Query<?> query, @NotNull Tag<T> tag, @Nullable T value) {
-        replace(query, tag, t -> value);
+    default void update(@NotNull Condition condition, @NotNull TagHandler handler) {
+        final int count = execute(delete().where(condition).build());
+        for (int i = 0; i < count; i++) {
+            insert(handler);
+        }
     }
 
     default <T> void updateSingle(@NotNull Tag<T> tag, @NotNull T value, @NotNull TagHandler handler) {
-        final Query<?> query = query().filter(Filter.eq(tag, value)).limit(1).build();
-        update(query, handler);
+        var delete = delete().where(Condition.eq(tag, value)).build();
+        execute(delete);
+        insert(handler);
     }
 
     default <T> @NotNull Optional<@NotNull NBTCompound> findFirst(@NotNull Tag<T> tag, @NotNull T value) {
-        final Query<NBTCompound> query = query().filter(Filter.eq(tag, value)).limit(1).build();
-        return find(query).stream().findFirst();
+        final SelectQuery<NBTCompound> query = select().where(Condition.eq(tag, value)).limit(1).build();
+        final List<NBTCompound> res = execute(query);
+        return res.isEmpty() ? Optional.empty() : Optional.of(res.get(0));
     }
 
-    sealed interface Query<T> permits TagDatabaseImpl.Query {
-        @Unmodifiable
-        @NotNull List<@NotNull Filter> filters();
+    static <T> @NotNull SelectBuilder<T> select(@NotNull Tag<T> tag) {
+        return new TagDatabaseImpl.SelectBuilder<>(tag);
+    }
+
+    static @NotNull SelectBuilder<NBTCompound> select() {
+        return select(Tag.View(TagSerializer.COMPOUND));
+    }
+
+    static @NotNull UpdateBuilder update() {
+        return new TagDatabaseImpl.UpdateBuilder();
+    }
+
+    static @NotNull DeleteBuilder delete() {
+        return new TagDatabaseImpl.DeleteBuilder();
+    }
+
+    interface SelectQuery<T> {
+        @NotNull Tag<T> selector();
+
+        @NotNull Condition condition();
 
         @Unmodifiable
         @NotNull List<@NotNull Sorter> sorters();
 
-        @NotNull Tag<T> selector();
-
         int limit();
-
-        sealed interface Builder<T> permits TagDatabaseImpl.QueryBuilder {
-            @NotNull Builder<T> filter(@NotNull Filter filter);
-
-            @NotNull Builder<T> sorter(@NotNull Sorter sorter);
-
-            @NotNull Builder<T> limit(int limit);
-
-            @NotNull Query<T> build();
-        }
     }
 
-    sealed interface Filter permits Filter.Eq {
-        static <T> Filter eq(@NotNull Tag<T> tag, @NotNull T value) {
-            return new TagDatabaseImpl.FilterEq<>(tag, value);
+    interface SelectBuilder<T> {
+        @NotNull SelectBuilder<T> where(@NotNull Condition condition);
+
+        @NotNull SelectBuilder<T> orderByAsc(@NotNull Tag<?> tag);
+
+        @NotNull SelectBuilder<T> orderByDesc(@NotNull Tag<?> tag);
+
+        @NotNull SelectBuilder<T> limit(int limit);
+
+        @NotNull SelectQuery<T> build();
+    }
+
+    interface UpdateQuery {
+        @NotNull Condition condition();
+    }
+
+    interface UpdateBuilder {
+        @NotNull UpdateBuilder where(@NotNull Condition condition);
+
+        <T> @NotNull UpdateBuilder set(@NotNull Tag<T> tag, @NotNull T value);
+
+        @NotNull UpdateQuery build();
+    }
+
+    interface DeleteQuery {
+        @NotNull Condition condition();
+    }
+
+    interface DeleteBuilder {
+        @NotNull DeleteBuilder where(@NotNull Condition condition);
+
+        @NotNull DeleteQuery build();
+    }
+
+    sealed interface Condition permits Condition.Eq {
+        static <T> Condition eq(@NotNull Tag<T> tag, @NotNull T value) {
+            return new TagDatabaseImpl.ConditionEq<>(tag, value);
         }
 
-        sealed interface Eq<T> extends Filter permits TagDatabaseImpl.FilterEq {
+        sealed interface Eq<T> extends Condition permits TagDatabaseImpl.ConditionEq {
             @NotNull Tag<T> tag();
 
             @NotNull T value();

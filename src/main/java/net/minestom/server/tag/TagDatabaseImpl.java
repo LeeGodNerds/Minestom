@@ -6,50 +6,97 @@ import java.util.ArrayList;
 import java.util.List;
 
 final class TagDatabaseImpl {
-    record Query<T>(List<TagDatabase.Filter> filters,
-                    List<TagDatabase.Sorter> sorters,
-                    Tag<T> selector, int limit) implements TagDatabase.Query<T> {
-        Query {
-            filters = List.copyOf(filters);
+    record Select<T>(Tag<T> selector,
+                     TagDatabase.Condition condition,
+                     List<TagDatabase.Sorter> sorters,
+                     int limit) implements TagDatabase.SelectQuery<T> {
+        Select {
             sorters = List.copyOf(sorters);
         }
     }
 
-    static final class QueryBuilder<T> implements TagDatabase.Query.Builder<T> {
+    record Update(TagDatabase.Condition condition) implements TagDatabase.UpdateQuery {
+    }
+
+    record Delete(TagDatabase.Condition condition) implements TagDatabase.DeleteQuery {
+    }
+
+    static final class SelectBuilder<T> implements TagDatabase.SelectBuilder<T> {
         private final Tag<T> selector;
-        private final List<TagDatabase.Filter> filters = new ArrayList<>();
+        private TagDatabase.Condition condition;
         private final List<TagDatabase.Sorter> sorters = new ArrayList<>();
         private int limit = -1;
 
-        QueryBuilder(Tag<T> selector) {
+        SelectBuilder(Tag<T> selector) {
             this.selector = selector;
         }
 
         @Override
-        public TagDatabase.Query.@NotNull Builder<T> filter(TagDatabase.@NotNull Filter filter) {
-            this.filters.add(filter);
+        public TagDatabase.@NotNull SelectBuilder<T> where(TagDatabase.@NotNull Condition condition) {
+            this.condition = condition;
             return this;
         }
 
         @Override
-        public TagDatabase.Query.@NotNull Builder<T> sorter(TagDatabase.@NotNull Sorter sorter) {
-            this.sorters.add(sorter);
+        public TagDatabase.@NotNull SelectBuilder<T> orderByAsc(@NotNull Tag<?> tag) {
+            this.sorters.add(new Sorter(tag, TagDatabase.SortOrder.ASCENDING));
             return this;
         }
 
         @Override
-        public TagDatabase.Query.@NotNull Builder<T> limit(int limit) {
+        public TagDatabase.@NotNull SelectBuilder<T> orderByDesc(@NotNull Tag<?> tag) {
+            this.sorters.add(new Sorter(tag, TagDatabase.SortOrder.DESCENDING));
+            return this;
+        }
+
+        @Override
+        public TagDatabase.@NotNull SelectBuilder<T> limit(int limit) {
             this.limit = limit;
             return this;
         }
 
         @Override
-        public TagDatabase.@NotNull Query<T> build() {
-            return new Query<>(filters, sorters, selector, limit);
+        public TagDatabase.@NotNull SelectQuery<T> build() {
+            return new Select<>(selector, condition, sorters, limit);
         }
     }
 
-    record FilterEq<T>(Tag<T> tag, T value) implements TagDatabase.Filter.Eq<T> {
+    static final class UpdateBuilder implements TagDatabase.UpdateBuilder {
+        private TagDatabase.Condition condition;
+
+        @Override
+        public TagDatabase.@NotNull UpdateBuilder where(TagDatabase.@NotNull Condition condition) {
+            this.condition = condition;
+            return this;
+        }
+
+        @Override
+        public <T> TagDatabase.@NotNull UpdateBuilder set(@NotNull Tag<T> tag, @NotNull T value) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public TagDatabase.@NotNull UpdateQuery build() {
+            return new Update(condition);
+        }
+    }
+
+    static final class DeleteBuilder implements TagDatabase.DeleteBuilder {
+        private TagDatabase.Condition condition;
+
+        @Override
+        public TagDatabase.@NotNull DeleteBuilder where(TagDatabase.@NotNull Condition condition) {
+            this.condition = condition;
+            return this;
+        }
+
+        @Override
+        public TagDatabase.@NotNull DeleteQuery build() {
+            return new Delete(condition);
+        }
+    }
+
+    record ConditionEq<T>(Tag<T> tag, T value) implements TagDatabase.Condition.Eq<T> {
     }
 
     record Sorter(Tag<?> tag, TagDatabase.SortOrder sortOrder) implements TagDatabase.Sorter {
