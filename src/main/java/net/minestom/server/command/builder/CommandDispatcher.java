@@ -5,6 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import it.unimi.dsi.fastutil.ints.Int2ObjectRBTreeMap;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.tokenizer.CommandInputTokenizer;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.command.builder.parser.CommandParser;
 import net.minestom.server.command.builder.parser.CommandQueryResult;
@@ -116,7 +117,7 @@ public class CommandDispatcher {
         final String[] parts = commandString.split(StringUtils.SPACE);
         final String commandName = parts[0];
 
-        final CommandQueryResult commandQueryResult = CommandParser.findCommand(this, commandString);
+        final CommandQueryResult commandQueryResult = CommandParser.findCommand(this, commandString, CommandInputTokenizer.DISPATCH);
         // Check if the command exists
         if (commandQueryResult == null) {
             return CommandResult.of(CommandResult.Type.UNKNOWN, commandName);

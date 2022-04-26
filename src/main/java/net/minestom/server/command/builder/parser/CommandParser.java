@@ -6,7 +6,7 @@ import net.minestom.server.command.builder.CommandContext;
 import net.minestom.server.command.builder.CommandDispatcher;
 import net.minestom.server.command.builder.CommandSyntax;
 import net.minestom.server.command.builder.arguments.Argument;
-import net.minestom.server.utils.StringUtils;
+import net.minestom.server.command.builder.arguments.tokenizer.CommandInputTokenizer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,8 +41,9 @@ public final class CommandParser {
         return commandQueryResult;
     }
 
-    public static @Nullable CommandQueryResult findCommand(@NotNull CommandDispatcher dispatcher, @NotNull String input) {
-        final String[] parts = input.split(StringUtils.SPACE);
+    public static @Nullable CommandQueryResult findCommand(@NotNull CommandDispatcher dispatcher, @NotNull String input, @NotNull CommandInputTokenizer tokenizer) {
+        String[] parts = tokenizer.tokenizeInput(input);
+
         final String commandName = parts[0];
 
         String[] args = new String[parts.length - 1];
