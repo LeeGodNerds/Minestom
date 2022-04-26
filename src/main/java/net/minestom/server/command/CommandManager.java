@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.minestom.server.command.builder.*;
 import net.minestom.server.command.builder.arguments.Argument;
 import net.minestom.server.command.builder.arguments.minecraft.SuggestionType;
+import net.minestom.server.command.builder.arguments.tokenizer.CommandInputTokenizer;
 import net.minestom.server.command.builder.condition.CommandCondition;
 import net.minestom.server.command.builder.parser.ArgumentQueryResult;
 import net.minestom.server.command.builder.parser.CommandParser;
@@ -202,7 +203,7 @@ public final class CommandManager {
             String input = pair.left();
             NodeMaker.Request request = pair.right();
 
-            final CommandQueryResult commandQueryResult = CommandParser.findCommand(dispatcher, input);
+            final CommandQueryResult commandQueryResult = CommandParser.findCommand(dispatcher, input, CommandInputTokenizer.DISPATCH);
             if (commandQueryResult == null) {
                 // Invalid command, return root node
                 request.retrieve(0);

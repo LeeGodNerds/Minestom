@@ -4,6 +4,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.command.builder.CommandSyntax;
 import net.minestom.server.command.builder.arguments.Argument;
+import net.minestom.server.command.builder.arguments.tokenizer.CommandInputTokenizer;
 import net.minestom.server.command.builder.parser.ArgumentQueryResult;
 import net.minestom.server.command.builder.parser.CommandParser;
 import net.minestom.server.command.builder.parser.CommandQueryResult;
@@ -27,7 +28,7 @@ public class TabCompleteListener {
         String commandName = split[0];
         String args = commandString.replaceFirst(Pattern.quote(commandName), "");
 
-        final CommandQueryResult commandQueryResult = CommandParser.findCommand(MinecraftServer.getCommandManager().getDispatcher(), commandString);
+        final CommandQueryResult commandQueryResult = CommandParser.findCommand(MinecraftServer.getCommandManager().getDispatcher(), commandString, CommandInputTokenizer.SUGGESTION);
         if (commandQueryResult == null) {
             // Command not found
             return;
