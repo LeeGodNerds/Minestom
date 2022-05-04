@@ -55,6 +55,7 @@ dependencies {
     // Only here to ensure J9 module support for extensions and our classloaders
     testCompileOnly(libs.mockito.core)
 
+    testImplementation(project(":minestom:testenv"))
 
     // Logging
     implementation(libs.bundles.logging)

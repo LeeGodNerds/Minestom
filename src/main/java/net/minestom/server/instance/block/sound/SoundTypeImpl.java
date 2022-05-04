@@ -18,7 +18,7 @@ public record SoundTypeImpl(NamespaceID namespace, int id, float volume, float p
         final SoundEvent placeSound = SoundEvent.fromNamespaceId(properties.getString("placeSound"));
         final SoundEvent hitSound = SoundEvent.fromNamespaceId(properties.getString("hitSound"));
         final SoundEvent fallSound = SoundEvent.fromNamespaceId(properties.getString("fallSound"));
-        return new SoundTypeImpl(NamespaceID.from(namespace), ID_COUNTER.getAndIncrement(), (float) volume, (float) pitch, breakSound, stepSound, placeSound, hitSound, fallSound);
+        return new SoundTypeImpl(NamespaceID.from("minecraft:" + namespace.toLowerCase()), ID_COUNTER.getAndIncrement(), (float) volume, (float) pitch, breakSound, stepSound, placeSound, hitSound, fallSound);
     });
 
     public static SoundType get(@NotNull String namespace) {
