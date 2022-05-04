@@ -1,10 +1,8 @@
-plugins {
-    `java-library`
-    id("minestom.publishing-conventions")
-    id("minestom.native-conventions")
+apply {
+    plugin("java")
 }
 
-allprojects {
+subprojects {
     group = "net.minestom.server"
     version = "1.0"
     description = "Lightweight and multi-threaded Minecraft server implementation"
