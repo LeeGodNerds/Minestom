@@ -9,6 +9,8 @@ import net.minestom.server.collision.Shape;
 import net.minestom.server.entity.EntitySpawnType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.sound.SoundType;
+import net.minestom.server.instance.block.sound.SoundTypeImpl;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.collection.ObjectArray;
@@ -133,6 +135,7 @@ public final class Registry {
         ENTITIES("entities.json"),
         ENCHANTMENTS("enchantments.json"),
         SOUNDS("sounds.json"),
+        SOUND_TYPES("sound_types.json"),
         STATISTICS("custom_statistics.json"),
         POTION_EFFECTS("potion_effects.json"),
         POTION_TYPES("potions.json"),
@@ -168,6 +171,7 @@ public final class Registry {
         private final int blockEntityId;
         private final Supplier<Material> materialSupplier;
         private final Shape shape;
+        private final SoundType soundType;
         private final Properties custom;
 
         private BlockEntry(String namespace, Properties main, Properties custom) {
@@ -184,6 +188,7 @@ public final class Registry {
             this.air = main.getBoolean("air", false);
             this.solid = main.getBoolean("solid");
             this.liquid = main.getBoolean("liquid", false);
+            this.soundType = SoundType.fromNamespaceId(main.getString("soundType"));
             {
                 Properties blockEntity = main.section("blockEntity");
                 if (blockEntity != null) {
@@ -270,6 +275,10 @@ public final class Registry {
 
         public Shape collisionShape() {
             return shape;
+        }
+
+        public SoundType soundType() {
+            return this.soundType;
         }
 
         @Override

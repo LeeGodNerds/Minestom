@@ -6,6 +6,7 @@ import net.minestom.server.attribute.AttributeModifier;
 import net.minestom.server.attribute.AttributeOperation;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.ServerPacketIdentifier;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.binary.BinaryReader;
 import net.minestom.server.utils.binary.BinaryWriter;
 import org.jetbrains.annotations.NotNull;
@@ -20,7 +21,7 @@ public record EntityPropertiesPacket(int entityId, List<AttributeInstance> prope
 
     public EntityPropertiesPacket(BinaryReader reader) {
         this(reader.readVarInt(), reader.readVarIntList(r -> {
-            final Attribute attribute = Attribute.fromKey(reader.readSizedString());
+            final Attribute attribute = Attribute.fromKey(NamespaceID.from(reader.readSizedString()));
             final double value = reader.readDouble();
             int modifierCount = reader.readVarInt();
             AttributeInstance instance = new AttributeInstance(attribute, null);
@@ -39,7 +40,7 @@ public record EntityPropertiesPacket(int entityId, List<AttributeInstance> prope
         for (AttributeInstance instance : properties) {
             final Attribute attribute = instance.getAttribute();
 
-            writer.writeSizedString(attribute.key());
+            writer.writeSizedString(attribute.key().asString());
             writer.writeDouble(instance.getBaseValue());
 
             {

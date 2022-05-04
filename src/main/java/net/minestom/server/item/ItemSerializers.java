@@ -8,6 +8,7 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagSerializer;
 import net.minestom.server.tag.TagWritable;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,7 +53,7 @@ public final class ItemSerializers {
             final UUID uuid = reader.getTag(ID);
             final double amount = reader.getTag(AMOUNT);
             final String slot = reader.getTag(SLOT);
-            final String attributeName = reader.getTag(ATTRIBUTE_NAME);
+            final NamespaceID attributeName = NamespaceID.from(reader.getTag(ATTRIBUTE_NAME));
             final int operation = reader.getTag(OPERATION);
             final String name = reader.getTag(NAME);
 
@@ -78,7 +79,7 @@ public final class ItemSerializers {
             writer.setTag(ID, value.uuid());
             writer.setTag(AMOUNT, value.amount());
             writer.setTag(SLOT, value.slot().name());
-            writer.setTag(ATTRIBUTE_NAME, value.attribute().key());
+            writer.setTag(ATTRIBUTE_NAME, value.attribute().key().toString());
             writer.setTag(OPERATION, value.operation().getId());
             writer.setTag(NAME, value.name());
         }

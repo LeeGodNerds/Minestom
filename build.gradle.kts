@@ -8,6 +8,12 @@ allprojects {
     group = "net.minestom.server"
     version = "1.0"
     description = "Lightweight and multi-threaded Minecraft server implementation"
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        maven(url = "https://jitpack.io")
+    }
 }
 
 sourceSets {

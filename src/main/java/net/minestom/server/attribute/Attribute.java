@@ -1,5 +1,6 @@
 package net.minestom.server.attribute;
 
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Represents a {@link net.minestom.server.entity.LivingEntity living entity} attribute.
  */
-public record Attribute(String key, float defaultValue, float maxValue) {
-    private static final Map<String, Attribute> ATTRIBUTES = new ConcurrentHashMap<>();
+public record Attribute(NamespaceID key, float defaultValue, float maxValue) {
+    private static final Map<NamespaceID, Attribute> ATTRIBUTES = new ConcurrentHashMap<>();
 
     public static final Attribute MAX_HEALTH = (new Attribute("generic.max_health", 20, 1024)).register();
     public static final Attribute FOLLOW_RANGE = (new Attribute("generic.follow_range", 32, 2048)).register();
@@ -33,11 +34,15 @@ public record Attribute(String key, float defaultValue, float maxValue) {
         }
     }
 
+    public Attribute(String key, float defaultValue, float maxValue) {
+        this(NamespaceID.from("minecraft", key), defaultValue, maxValue);
+    }
+
     /**
      * Register this attribute.
      *
      * @return this attribute
-     * @see #fromKey(String)
+     * @see #fromKey(NamespaceID)
      * @see #values()
      */
     public @NotNull Attribute register() {
@@ -51,7 +56,7 @@ public record Attribute(String key, float defaultValue, float maxValue) {
      * @param key the key of the attribute
      * @return the attribute for the key or null if not any
      */
-    public static @Nullable Attribute fromKey(@NotNull String key) {
+    public static @Nullable Attribute fromKey(@NotNull NamespaceID key) {
         return ATTRIBUTES.get(key);
     }
 
