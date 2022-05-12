@@ -188,7 +188,7 @@ public final class Registry {
             this.air = main.getBoolean("air", false);
             this.solid = main.getBoolean("solid");
             this.liquid = main.getBoolean("liquid", false);
-            this.soundType = SoundType.fromNamespaceId(main.getString("soundType"));
+            this.soundType = SoundType.fromNamespaceId("minecraft:" + main.getString("soundType").toLowerCase());
             {
                 Properties blockEntity = main.section("blockEntity");
                 if (blockEntity != null) {
