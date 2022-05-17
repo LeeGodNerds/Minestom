@@ -30,6 +30,8 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
+import io.fairyproject.next.metadata.MetadataMap;
+import io.fairyproject.next.metadata.MetadataMapProxy;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.LazyPacket;
 import net.minestom.server.network.packet.server.ServerPacket;
@@ -83,7 +85,7 @@ import java.util.function.UnaryOperator;
  * To create your own entity you probably want to extends {@link LivingEntity} or {@link EntityCreature} instead.
  */
 public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, EventHandler<EntityEvent>, Taggable,
-        ForwardingPermissionHandler, HoverEventSource<ShowEntity>, Sound.Emitter {
+        ForwardingPermissionHandler, HoverEventSource<ShowEntity>, Sound.Emitter, MetadataMapProxy {
 
     private static final Int2ObjectSyncMap<Entity> ENTITY_BY_ID = Int2ObjectSyncMap.hashmap();
     private static final Map<UUID, Entity> ENTITY_BY_UUID = new ConcurrentHashMap<>();
@@ -166,6 +168,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
     private long lastAbsoluteSynchronizationTime;
 
     protected Metadata metadata = new Metadata(this);
+    protected MetadataMap metadataMap = MetadataMap.create();
     protected EntityMeta entityMeta;
 
     private final List<TimedPotion> effects = new CopyOnWriteArrayList<>();
@@ -529,6 +532,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
             return;
 
         // scheduled tasks
+        this.metadataMap.cleanup();
         this.scheduler.processTick();
         if (isRemoved()) return;
 
@@ -1684,6 +1688,11 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
                 .min(Comparator.comparingDouble(e -> e.getDistance(this.position)));
 
         return nearby.orElse(null);
+    }
+
+    @Override
+    public MetadataMap getMetadataMap() {
+        return this.metadataMap;
     }
 
     public enum Pose {
