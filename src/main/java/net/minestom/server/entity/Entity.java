@@ -210,6 +210,10 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
         this(entityType, UUID.randomUUID());
     }
 
+    public Pos getPreviousPosition() {
+        return previousPosition;
+    }
+
     /**
      * Schedules a task to be run during the next entity tick.
      *
